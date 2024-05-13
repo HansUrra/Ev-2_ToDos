@@ -1,17 +1,21 @@
-import { setLocale } from "yup";
-import { es } from "yup-locales";
+import { bool, setLocale } from "yup";
+import { es, th } from "yup-locales";
 import { object, string, number } from "yup";
 
 setLocale(es);
 
-export const createTodosSchema = object({
-    title: string().optional(),
-    completed: Boolean().optional(),
+export const insertTodosSchema = object({
+    title: string().required()
 });
 
 export const updateTodosSchema = object({
     title: string().optional(),
-    completed: Boolean().optional(),
+    completed: bool().optional(),
+    id: string().required()
+});
+
+export const idTodoSchema = object({
+    id: string().required()
 });
 
 export const loginSchema = object({

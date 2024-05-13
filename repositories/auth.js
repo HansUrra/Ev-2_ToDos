@@ -1,4 +1,4 @@
-
+import { scrypt, randomBytes, randomUUID } from 'node:crypto'
 const users = [
 	{
 		username: 'admin',
@@ -15,24 +15,18 @@ const users = [
 
 export async function login(username, password) {
 
-	if (typeof username !== 'string' || typeof password !== 'string') {
-		return res.status(400).send({
-			error: 'Datos incorrectos. Recuerde enviar usuario y contraseña'
-		})
+	if (typeof username === undefined || typeof password === undefined) {
+		throw new Error('Datos incorrectos. Recuerde enviar usuario y contraseña');
 	}
-
+	
 	const user = users.find(user => user.username === username)
 
 	if (!user) {
-		return res.status(401).send({
-			error: 'Usuario y/o password incorrectos'
-		})
+		throw new Error('Usuario y/o password incorrectos');
 	}
 
 	if (!(await checkPassword(password, user.password))) {
-		return res.status(401).send({
-			error: 'Usuario y/o password incorrectos'
-		})
+		throw new Error('Usuario y/o password incorrectos');
 	}
 
 	user.token = randomBytes(48).toString('hex')
@@ -42,7 +36,6 @@ export async function login(username, password) {
 		name: user.name,
 		token: user.token
 	}
-
 }
 
 
@@ -58,4 +51,22 @@ export function checkPassword(password, hash) {
 			resolve(derivedKey.toString('hex') === key)
 		})
 	})
+}
+
+
+export function authMiddleware(req, res, next) {
+
+	const authorizationToken = req.get('x-authorization')
+
+	if (!authorizationToken) {
+		return res.status(401).send({ error: 'Token de autorización no enviado. Recuerda usar el header X-Authorization' })
+	}
+
+	const user = users.find(user => user.token === authorizationToken)
+
+	if (!user) {
+		return res.status(401).send({ error: 'Token inválido' })
+	}
+
+	next()
 }
