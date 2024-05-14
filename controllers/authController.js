@@ -1,16 +1,14 @@
 import { Router } from "express";
 import {
-	login
+	login,
+	logout,
+	authMiddleware
 } from "../repositories/auth.js";
 import {
 	validateCredentials
 } from "../middlewares/validation.js";
-import {
-  	loginSchema
-} from "../schemas/index.js";
 
 const router = new Router();
-
 
 router.post('/login', validateCredentials(), async (req, res) => {
 	try {
@@ -20,15 +18,14 @@ router.post('/login', validateCredentials(), async (req, res) => {
 	}
 })
 
-router.post('/logout', async (req, res) => {
-  
-  let token;
+router.post('/logout', authMiddleware, async (req, res) => {
 	try {
-		token = loginSchema.validateSync(req, {
-		stripUnknown: true,
-		});
 
-    res.status(204).send(await logout(token))
+		logout(req);
+
+		res.type("application/json");
+		res.status(204).send()
+
 	} catch (ex) {
 		return res.status(404).send(ex);
 	}

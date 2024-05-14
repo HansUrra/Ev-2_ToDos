@@ -46,6 +46,7 @@ router.put('/todos/:id', authMiddleware, validateUpdateTodo(), (req, res) => {
 		return res.status(err.status).send(err.message);
 	}
 })
+
 //ELIMINAR TODO
 router.delete('/todos/:id', authMiddleware, validateIdTodo(), (req, res) => {
 	try {

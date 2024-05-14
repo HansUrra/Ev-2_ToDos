@@ -12,7 +12,6 @@ const users = [
 	}
 ]
 
-
 export async function login(username, password) {
 
 	if (typeof username === undefined || typeof password === undefined) {
@@ -38,6 +37,23 @@ export async function login(username, password) {
 	}
 }
 
+export async function logout(req) {
+
+	const authorizationToken = req.get('x-authorization')
+
+	if (!authorizationToken) {
+		return res.status(401).send({ error: 'Token de autorización no enviado. Recuerda usar el header X-Authorization' })
+	}
+
+	const user = users.find(user => user.token === authorizationToken)
+
+	if (!user) {
+		return res.status(401).send({ error: 'Token inválido' })
+	}
+	user.token = "";
+
+
+}
 
 export function checkPassword(password, hash) {
 	const [salt, key] = hash.split(':')
@@ -52,7 +68,6 @@ export function checkPassword(password, hash) {
 		})
 	})
 }
-
 
 export function authMiddleware(req, res, next) {
 
