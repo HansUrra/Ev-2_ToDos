@@ -3,18 +3,18 @@ import {
 	login,
 	logout,
 	authMiddleware
-} from "../repositories/auth.js";
+} from "../repositories/users.js";
 import {
 	validateCredentials
 } from "../middlewares/validation.js";
 
-const router = new Router();
+const router = Router();
 
 router.post('/login', validateCredentials(), async (req, res) => {
 	try {
 		res.send(await login(req.validatedData.username, req.validatedData.password))
-	} catch (ex) {
-		return res.status(401).send(ex);
+	} catch (err) {
+		return res.status(err.status).send(err.message);
 	}
 })
 

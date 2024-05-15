@@ -13,18 +13,23 @@ import {
 } from "../middlewares/validation.js";
 import {
 	authMiddleware
-} from "../repositories/auth.js";
+} from "../repositories/users.js";
 
 
-const router = new Router();
+const router = Router();
 //LISTAR TODOS
 router.get('/todos', authMiddleware, (req, res) => {
-	res.send(selectTodos);
+	try {
+		
+		res.send(selectTodos);
+	}catch (err) {
+		return res.status(err.status).send(err.message);
+	}
 })
 //BUSCAR TODO
 router.get('/todos/:id', authMiddleware, validateIdTodo(), (req, res) => {
 	try {
-		res.send(selectTodo(req.validatedData.id));
+		res.status(200).send(selectTodo(req.validatedData.id));
 	} catch (err) { 
 		return res.status(err.status).send(err.message)
 	}
@@ -53,7 +58,7 @@ router.delete('/todos/:id', authMiddleware, validateIdTodo(), (req, res) => {
 		deleteTodo(req.validatedData.id)
 		res.status(204).send();
 	} catch (err) {
-		res.status(err.status).send(err.message);
+		return res.status(err.status).send(err.message);
 	}
 })
 

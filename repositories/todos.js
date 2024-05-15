@@ -2,7 +2,11 @@ import { randomUUID } from 'node:crypto'
 
 import { CustomError } from "../utils/customErrors.js";
 
-export const selectTodos = []
+
+
+export const selectTodos = [];
+
+export const toDos = selectTodos;
 
 export function selectTodo (id) {
 
