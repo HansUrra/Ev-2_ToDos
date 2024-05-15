@@ -29,7 +29,8 @@ router.get('/todos', authMiddleware, (req, res) => {
 //BUSCAR TODO
 router.get('/todos/:id', authMiddleware, validateIdTodo(), (req, res) => {
 	try {
-		res.status(200).send(selectTodo(req.validatedData.id));
+		const todo = selectTodo(req.validatedData.id);
+		res.status(200).send(todo);
 	} catch (err) { 
 		return res.status(err.status).send(err.message)
 	}
@@ -37,7 +38,8 @@ router.get('/todos/:id', authMiddleware, validateIdTodo(), (req, res) => {
 //INSERTAR TODO
 router.post('/todos', authMiddleware, validateInsertTodo(), (req, res) => {
 	try {
-    	res.status(201).send(insertTodo(req.validatedData));
+		const todo = insertTodo(req.validatedData)
+    	res.status(201).send(todo);
 	} catch (err) {
 		return res.status(err.status).send(err.message);
 	}
@@ -46,7 +48,10 @@ router.post('/todos', authMiddleware, validateInsertTodo(), (req, res) => {
 //MODIFICAR TODO
 router.put('/todos/:id', authMiddleware, validateUpdateTodo(), (req, res) => {
 	try {
-    	res.status(200).send(updateTodo(req.validatedData));
+
+		const todo = updateTodo(req.validatedData)
+
+    	res.status(200).send(todo);
 	} catch (err) {
 		return res.status(err.status).send(err.message);
 	}

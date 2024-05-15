@@ -1,7 +1,7 @@
 import { scrypt, randomBytes, randomUUID } from 'node:crypto'
-import { CustomError } from '../utils/customErrors';
+import { CustomError } from "../utils/customErrors.js";
 
-export const users = [
+const users = [
 	{
 		username: 'admin',
 		name: 'Gustavo Alfredo Marín Sáez',
@@ -17,17 +17,20 @@ export const users = [
 export async function login(username, password) {
 
 	if (typeof username === undefined || typeof password === undefined) {
-		throw new CustomError(401,'Datos incorrectos. Recuerde enviar usuario y contraseña');
+		throw new CustomError(401, "Datos incorrectos. Recuerde enviar usuario y contraseña");
+		//throw new Error('Datos incorrectos. Recuerde enviar usuario y contraseña');
 	}
 	
 	const user = users.find(user => user.username === username)
 
 	if (!user) {
-		throw new CustomError(401, 'Usuario y/o password incorrectos');
+		throw new CustomError(401, "Usuario y/o password incorrectos");
+		//throw new Error('Usuario y/o password incorrectos');
 	}
 
 	if (!(await checkPassword(password, user.password))) {
-		throw new CustomError(401, 'Usuario y/o password incorrectos');
+		throw new CustomError(401, "Usuario y/o password incorrectos");
+		//throw new Error('Usuario y/o password incorrectos');
 	}
 
 	user.token = randomBytes(48).toString('hex')
@@ -44,17 +47,19 @@ export async function logout(req) {
 	const authorizationToken = req.get('x-authorization')
 
 	if (!authorizationToken) {
-		throw new CustomError(401, "Token de autorización no enviado. Recuerda usar el header X-Authorization");
+		throw new CustomError(401, 'Token de autorización no enviado. Recuerda usar el header X-Authorization');
 		//return res.status(401).send({ error: 'Token de autorización no enviado. Recuerda usar el header X-Authorization' })
 	}
 
-	const userIndex = users.findIndex(user => user.token === authorizationToken)
+	const user = users.find(user => user.token === authorizationToken)
 
 	if (!user) {
+		throw new CustomError(401, 'Token inválido');
 		//return res.status(401).send({ error: 'Token inválido' })
-		throw new CustomError(401, "Token inválido");
 	}
-	users[userIndex].token = undefined;
+	user.token = "";
+
+
 }
 
 export function checkPassword(password, hash) {
@@ -63,8 +68,8 @@ export function checkPassword(password, hash) {
 	return new Promise((resolve) => {
 		scrypt(password, salt, 64, (err, derivedKey) => {
 			if(err) {
-				// return resolve(false) // or throw mmm...
-				throw new CustomError(401, "credenciales invalidas");
+				throw new CustomError(401, "Unauthorized");
+				//return resolve(false) // or throw mmm...
 			}
 
 			resolve(derivedKey.toString('hex') === key)
@@ -74,32 +79,19 @@ export function checkPassword(password, hash) {
 
 export function authMiddleware(req, res, next) {
 
-	try {
-		const authorizationToken = req.get('x-authorization');
+	const authorizationToken = req.get('x-authorization');
 
-		if (authorizationToken !== undefined) {
-			throw new CustomError(401, "Token de autorización no enviado. Recuerda usar el header X-Authorizatio");
-			//return res.status(401).send({ error: 'Token de autorización no enviado. Recuerda usar el header X-Authorization' })
-		}
-
-		let user;
-		try {
-			user = users.find(user => user.token === authorizationToken)
-		} catch (err) {
-			throw new CustomError(401, "token inválido");
-		}
-	
-		if (!user) {
-			throw new CustomError(401, "Token inválido");
-			// return res.status(401).send({ error: 'Token inválido' })
-		}
-
-	} catch (err) {
-		throw new CustomError(401, "Token inválido");
-		//return res.status(401).send({ error: 'Token inválido' })
+	if (!authorizationToken) {
+		throw new CustomError(404, "Unauthorized");
+		//return res.status(401).send({ error: 'Token de autorización no enviado. Recuerda usar el header X-Authorization' })
 	}
 
+	const user = users.find(user => user.token === authorizationToken)
 
+	if (!user) {
+		throw new CustomError(404, "Unauthorized");
+		//return res.status(401).send({ error: 'Token inválido' })
+	}
 
 	next()
 }
