@@ -82,14 +82,14 @@ export function authMiddleware(req, res, next) {
 	const authorizationToken = req.get('x-authorization');
 
 	if (!authorizationToken) {
-		throw new CustomError(404, "Unauthorized");
+		throw new CustomError(401, "Unauthorized");
 		//return res.status(401).send({ error: 'Token de autorización no enviado. Recuerda usar el header X-Authorization' })
 	}
 
 	const user = users.find(user => user.token === authorizationToken)
 
 	if (!user) {
-		throw new CustomError(404, "Unauthorized");
+		throw new CustomError(401, "Unauthorized");
 		//return res.status(401).send({ error: 'Token inválido' })
 	}
 
